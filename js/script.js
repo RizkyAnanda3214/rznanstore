@@ -1,27 +1,3 @@
-/*=============================
-    COPY VOUCHER
-==============================*/
-
-const copyBtn = document.querySelector(".copy-btn");
-
-if(copyBtn){
-
-    copyBtn.addEventListener("click",()=>{
-
-        navigator.clipboard.writeText("RZNANEW10");
-
-        copyBtn.innerHTML="✓ Berhasil Disalin";
-
-        setTimeout(()=>{
-
-            copyBtn.innerHTML="Salin Kode";
-
-        },2000);
-
-    });
-
-}
-
 /*=====================================================
             RZNANSTORE
             script.js
@@ -150,6 +126,34 @@ window.addEventListener("scroll",()=>{
 
 });
 
+/*=============================
+    COPY VOUCHER
+==============================*/
+
+const copyBtn = document.querySelector(".copy-btn");
+
+if(copyBtn){
+
+    copyBtn.addEventListener("click",()=>{
+
+        navigator.clipboard.writeText("RZNANEW10");
+
+        if(typeof gtag === "function"){
+            gtag("event","copy_voucher",{
+                voucher:"RZNANEW10"
+            });
+        }
+
+        copyBtn.innerHTML="✓ Berhasil Disalin";
+
+        setTimeout(()=>{
+            copyBtn.innerHTML="Salin Kode";
+        },2000);
+
+    });
+
+}
+
 
 /*==========================
       COUNTER
@@ -210,32 +214,6 @@ startCounter();
 }
 
 });
-
-
-/*==========================
-      COPY VOUCHER
-===========================*/
-
-const copyBtn=document.querySelector(".copy-btn");
-
-if(copyBtn){
-
-copyBtn.addEventListener("click",()=>{
-
-navigator.clipboard.writeText("RZNANEW10");
-
-copyBtn.innerHTML="✓ Berhasil Disalin";
-
-setTimeout(()=>{
-
-copyBtn.innerHTML="Salin Kode";
-
-},2000);
-
-});
-
-}
-
 
 /*==========================
       BACK TO TOP
@@ -318,3 +296,180 @@ if(year){
 year.innerHTML=new Date().getFullYear();
 
 }
+
+document.querySelectorAll(".btn-primary").forEach(button=>{
+
+button.addEventListener("click",(e)=>{
+
+e.preventDefault();
+
+if(typeof gtag==="function"){
+
+gtag("event","topup_click",{
+
+button_name:button.innerText.trim()
+
+});
+
+}
+
+});
+
+});
+
+
+const login=document.querySelector(".btn-login");
+
+if(login){
+
+    login.addEventListener("click",(e)=>{
+
+        e.preventDefault();
+
+        if(typeof gtag==="function"){
+
+            gtag("event","login_click");
+
+        }
+
+    });
+
+}
+
+
+document.querySelectorAll(".nav-menu a").forEach(menu=>{
+
+menu.addEventListener("click",()=>{
+
+if(typeof gtag==="function"){
+
+gtag("event","menu_click",{
+
+menu:menu.innerText.trim()
+
+});
+
+}
+
+});
+
+});
+
+let scrollSent=false;
+
+window.addEventListener("scroll",()=>{
+
+if(!scrollSent){
+
+const scrollPercent=(window.scrollY+window.innerHeight)/document.body.scrollHeight;
+
+if(scrollPercent>0.9){
+
+scrollSent=true;
+
+if(typeof gtag==="function"){
+
+gtag("event","scroll_90");
+
+}
+
+}
+
+}
+
+});
+
+
+const videoButton=document.querySelector(".play-button a");
+
+if(videoButton){
+
+    videoButton.addEventListener("click",()=>{
+
+        if(typeof gtag==="function"){
+
+            gtag("event","video_click");
+
+        }
+
+    });
+
+}
+
+
+if(backTop){
+
+    backTop.addEventListener("click",()=>{
+
+        if(typeof gtag==="function"){
+
+            gtag("event","back_to_top");
+
+        }
+
+    });
+
+}
+
+
+/*=================================
+        TIME ON PAGE
+==================================*/
+
+let startTime=Date.now();
+
+window.addEventListener("beforeunload",()=>{
+
+const seconds=Math.round((Date.now()-startTime)/1000);
+
+if(typeof gtag==="function"){
+
+gtag("event","time_on_page",{
+
+seconds:seconds
+
+});
+
+}
+
+});
+
+
+/*=================================
+      SOCIAL CLICK
+==================================*/
+
+document.querySelectorAll(".social-media a").forEach(link=>{
+
+link.addEventListener("click",()=>{
+
+const icon=link.querySelector("i");
+
+if(typeof gtag==="function"){
+
+gtag("event","social_click",{
+
+social:icon.className
+
+});
+
+}
+
+});
+
+});
+
+
+window.addEventListener("error",(e)=>{
+
+if(typeof gtag==="function"){
+
+gtag("event","javascript_error",{
+
+message:e.message
+
+});
+
+}
+
+});
