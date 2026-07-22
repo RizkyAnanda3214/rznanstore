@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rizkyananda3214.github.io/rznanstore/sitemap.xml
