@@ -3,473 +3,669 @@
             script.js
 =====================================================*/
 
-/*==========================
-        STICKY NAVBAR
-===========================*/
+document.addEventListener("DOMContentLoaded", () => {
 
-const header = document.querySelector(".header");
+    /*==========================
+          ELEMENT REFERENCES
+    ==========================*/
 
-window.addEventListener("scroll", () => {
+    const header = document.querySelector(".header");
+    const hamburger = document.querySelector(".hamburger");
+    const navMenu = document.querySelector(".nav-menu");
+    const backTop = document.querySelector(".back-to-top");
+    const copyBtn = document.querySelector(".copy-btn");
+    const year = document.querySelector("#year");
 
-    if (window.scrollY > 80) {
+    const navLinks = document.querySelectorAll(".nav-menu a");
+    const sections = document.querySelectorAll("section");
 
-        header.classList.add("active");
 
-    } else {
+    /*==========================
+          STICKY NAVBAR
+    ==========================*/
 
-        header.classList.remove("active");
+    let ticking = false;
+
+    const handleScroll = () => {
+
+        const scrollY = window.scrollY;
+
+        /* Sticky Navbar */
+
+        if (header) {
+            header.classList.toggle("active", scrollY > 80);
+        }
+
+        /* Back To Top */
+
+        if (backTop) {
+            const showBackTop = scrollY > 500;
+
+            backTop.style.opacity = showBackTop ? "1" : "0";
+            backTop.style.pointerEvents = showBackTop
+                ? "auto"
+                : "none";
+        }
+
+        /* Active Navigation */
+
+        let current = "";
+
+        sections.forEach(section => {
+
+            const sectionTop = section.offsetTop - 120;
+
+            if (scrollY >= sectionTop) {
+                current = section.getAttribute("id");
+            }
+
+        });
+
+        navLinks.forEach(link => {
+
+            link.classList.toggle(
+                "active",
+                link.getAttribute("href") === `#${current}`
+            );
+
+        });
+
+        /* Scroll 90% GA4 */
+
+        if (!window.scrollSent) {
+
+            const scrollPercent =
+                (scrollY + window.innerHeight) /
+                document.documentElement.scrollHeight;
+
+            if (scrollPercent >= 0.9) {
+
+                window.scrollSent = true;
+
+                if (typeof gtag === "function") {
+
+                    gtag("event", "scroll_90");
+
+                }
+
+            }
+
+        }
+
+        ticking = false;
+
+    };
+
+
+    window.addEventListener("scroll", () => {
+
+        if (!ticking) {
+
+            window.requestAnimationFrame(handleScroll);
+
+            ticking = true;
+
+        }
+
+    }, { passive: true });
+
+
+    /*==========================
+          HAMBURGER MENU
+    ==========================*/
+
+    if (hamburger && navMenu) {
+
+        hamburger.addEventListener("click", () => {
+
+            hamburger.classList.toggle("active");
+
+            navMenu.classList.toggle("active");
+
+        });
 
     }
 
-});
 
+    /*==========================
+          CLOSE MOBILE MENU
+    ==========================*/
 
-/*==========================
-      HAMBURGER MENU
-===========================*/
+    navLinks.forEach(link => {
 
-const hamburger = document.querySelector(".hamburger");
-const navMenu = document.querySelector(".nav-menu");
+        link.addEventListener("click", () => {
 
-if (hamburger) {
+            if (hamburger) {
+                hamburger.classList.remove("active");
+            }
 
-    hamburger.addEventListener("click", () => {
+            if (navMenu) {
+                navMenu.classList.remove("active");
+            }
 
-        hamburger.classList.toggle("active");
-
-        navMenu.classList.toggle("active");
-
-    });
-
-}
-
-
-/*==========================
-      CLOSE MENU CLICK
-===========================*/
-
-document.querySelectorAll(".nav-menu a").forEach(link => {
-
-    link.addEventListener("click", () => {
-
-        hamburger.classList.remove("active");
-
-        navMenu.classList.remove("active");
+        });
 
     });
 
-});
 
+    /*==========================
+          SMOOTH SCROLL
+    ==========================*/
 
-/*==========================
-      SMOOTH SCROLL
-===========================*/
+    document
+        .querySelectorAll('a[href^="#"]')
+        .forEach(anchor => {
 
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener("click", function (e) {
 
-    anchor.addEventListener("click", function(e){
+                const href = this.getAttribute("href");
 
-        const target = document.querySelector(this.getAttribute("href"));
+                if (!href || href === "#") {
+                    return;
+                }
 
-        if(target){
+                const target =
+                    document.querySelector(href);
 
-            e.preventDefault();
+                if (target) {
 
-            target.scrollIntoView({
+                    e.preventDefault();
 
-                behavior:"smooth"
+                    target.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+
+                }
 
             });
 
-        }
+        });
+
+
+    /*==========================
+          COPY VOUCHER
+    ==========================*/
+
+    if (copyBtn) {
+
+        copyBtn.addEventListener("click", async () => {
+
+            const voucher = "RZNANEW10";
+
+            try {
+
+                await navigator.clipboard.writeText(voucher);
+
+                copyBtn.innerHTML = "✓ Berhasil Disalin";
+
+                if (typeof gtag === "function") {
+
+                    gtag("event", "copy_voucher", {
+                        voucher: voucher
+                    });
+
+                }
+
+                setTimeout(() => {
+
+                    copyBtn.innerHTML = "Salin Kode";
+
+                }, 2000);
+
+            } catch (error) {
+
+                console.error(
+                    "Gagal menyalin voucher:",
+                    error
+                );
+
+            }
+
+        });
+
+    }
+
+
+    /*==========================
+          COUNTER ANIMATION
+    ==========================*/
+
+    const counters =
+        document.querySelectorAll(".counter");
+
+    const startCounter = () => {
+
+        counters.forEach(counter => {
+
+            const target =
+                Number(counter.dataset.target);
+
+            let count = 0;
+
+            const speed = target / 150;
+
+            const update = () => {
+
+                count += speed;
+
+                if (count < target) {
+
+                    counter.innerText =
+                        Math.floor(count)
+                        .toLocaleString();
+
+                    requestAnimationFrame(update);
+
+                } else {
+
+                    counter.innerText =
+                        target.toLocaleString();
+
+                }
+
+            };
+
+            update();
+
+        });
+
+    };
+
+
+    /*==========================
+       COUNTER INTERSECTION
+    ==========================*/
+
+    const statistics =
+        document.querySelector(".statistics");
+
+    if (
+        statistics &&
+        counters.length &&
+        "IntersectionObserver" in window
+    ) {
+
+        let counterStarted = false;
+
+        const counterObserver =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(entry => {
+
+                        if (
+                            entry.isIntersecting &&
+                            !counterStarted
+                        ) {
+
+                            counterStarted = true;
+
+                            startCounter();
+
+                            counterObserver.disconnect();
+
+                        }
+
+                    });
+
+                },
+                {
+                    threshold: 0.2
+                }
+            );
+
+        counterObserver.observe(statistics);
+
+    }
+
+
+    /*==========================
+          REVEAL ANIMATION
+    ==========================*/
+
+    const reveals =
+        document.querySelectorAll(
+            ".hero, .problem, .why-us, .cta, " +
+            ".testimonial, .statistics, .about, " +
+            ".video-section, .promo, .footer"
+        );
+
+
+    /* Initial State */
+
+    reveals.forEach(element => {
+
+        element.classList.add("reveal-element");
 
     });
 
-});
+
+    /* Intersection Observer */
+
+    if ("IntersectionObserver" in window) {
+
+        const revealObserver =
+            new IntersectionObserver(
+                entries => {
+
+                    entries.forEach(entry => {
+
+                        if (entry.isIntersecting) {
+
+                            entry.target.classList.add(
+                                "reveal-visible"
+                            );
+
+                            revealObserver.unobserve(
+                                entry.target
+                            );
+
+                        }
+
+                    });
+
+                },
+                {
+                    threshold: 0.1,
+                    rootMargin: "0px 0px -80px 0px"
+                }
+            );
 
 
-/*==========================
-        ACTIVE MENU
-===========================*/
+        reveals.forEach(element => {
 
-const sections = document.querySelectorAll("section");
-const navLinks = document.querySelectorAll(".nav-menu a");
+            revealObserver.observe(element);
 
-window.addEventListener("scroll",()=>{
+        });
 
-    let current="";
+    } else {
 
-    sections.forEach(section=>{
+        reveals.forEach(element => {
 
-        const top=section.offsetTop-120;
-        const height=section.clientHeight;
+            element.classList.add(
+                "reveal-visible"
+            );
 
-        if(pageYOffset>=top){
+        });
 
-            current=section.getAttribute("id");
+    }
 
-        }
 
-    });
+    /*==========================
+          CURRENT YEAR
+    ==========================*/
 
-    navLinks.forEach(link=>{
+    if (year) {
 
-        link.classList.remove("active");
+        year.textContent =
+            new Date().getFullYear();
 
-        if(link.getAttribute("href")=="#"+current){
+    }
 
-            link.classList.add("active");
 
-        }
+    /*==========================
+          TOP UP BUTTON GA4
+    ==========================*/
 
-    });
+    document
+        .querySelectorAll(".btn-primary")
+        .forEach(button => {
 
-});
+            button.addEventListener("click", () => {
 
-/*=============================
-    COPY VOUCHER
-==============================*/
+                if (typeof gtag === "function") {
 
-const copyBtn = document.querySelector(".copy-btn");
+                    gtag("event", "topup_click", {
 
-if(copyBtn){
+                        button_name:
+                            button.innerText.trim()
 
-    copyBtn.addEventListener("click",()=>{
+                    });
 
-        navigator.clipboard.writeText("RZNANEW10");
+                }
 
-        if(typeof gtag === "function"){
-            gtag("event","copy_voucher",{
-                voucher:"RZNANEW10"
             });
-        }
 
-        copyBtn.innerHTML="✓ Berhasil Disalin";
+        });
 
-        setTimeout(()=>{
-            copyBtn.innerHTML="Salin Kode";
-        },2000);
+
+    /*==========================
+          LOGIN BUTTON GA4
+    ==========================*/
+
+    const login =
+        document.querySelector(".btn-login");
+
+    if (login) {
+
+        login.addEventListener(
+            "click",
+            () => {
+
+                if (typeof gtag === "function") {
+
+                    gtag(
+                        "event",
+                        "login_click"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*==========================
+          MENU CLICK GA4
+    ==========================*/
+
+    navLinks.forEach(menu => {
+
+        menu.addEventListener(
+            "click",
+            () => {
+
+                if (typeof gtag === "function") {
+
+                    gtag(
+                        "event",
+                        "menu_click",
+                        {
+                            menu:
+                                menu.innerText.trim()
+                        }
+                    );
+
+                }
+
+            }
+        );
 
     });
 
-}
 
+    /*==========================
+          VIDEO CLICK GA4
+    ==========================*/
 
-/*==========================
-      COUNTER
-===========================*/
+    const videoButton =
+        document.querySelector(
+            ".play-button a"
+        );
 
-const counters=document.querySelectorAll(".counter");
+    if (videoButton) {
 
-const startCounter=()=>{
+        videoButton.addEventListener(
+            "click",
+            () => {
 
-counters.forEach(counter=>{
+                if (typeof gtag === "function") {
 
-const target=+counter.dataset.target;
+                    gtag(
+                        "event",
+                        "video_click"
+                    );
 
-let count=0;
+                }
 
-const speed=target/150;
+            }
+        );
 
-const update=()=>{
+    }
 
-count+=speed;
 
-if(count<target){
+    /*==========================
+          BACK TO TOP GA4
+    ==========================*/
 
-counter.innerText=Math.floor(count).toLocaleString();
+    if (backTop) {
 
-requestAnimationFrame(update);
+        backTop.addEventListener(
+            "click",
+            () => {
 
-}else{
+                if (typeof gtag === "function") {
 
-counter.innerText=target.toLocaleString();
+                    gtag(
+                        "event",
+                        "back_to_top"
+                    );
 
-}
+                }
 
-}
+            }
+        );
 
-update();
+    }
 
-});
 
-}
+    /*==========================
+          SOCIAL CLICK GA4
+    ==========================*/
 
-let counterStarted=false;
+    document
+        .querySelectorAll(".social-media a")
+        .forEach(link => {
 
-window.addEventListener("scroll",()=>{
+            link.addEventListener(
+                "click",
+                () => {
 
-const stat=document.querySelector(".statistics");
+                    const icon =
+                        link.querySelector("i");
 
-if(!stat) return;
+                    if (
+                        typeof gtag === "function"
+                    ) {
 
-const top=stat.offsetTop-500;
+                        gtag(
+                            "event",
+                            "social_click",
+                            {
+                                social:
+                                    icon
+                                        ? icon.className
+                                        : "unknown"
+                            }
+                        );
 
-if(window.scrollY>top && !counterStarted){
+                    }
 
-counterStarted=true;
+                }
+            );
 
-startCounter();
+        });
 
-}
 
-});
+    /*==========================
+          TIME ON PAGE
+    ==========================*/
 
-/*==========================
-      BACK TO TOP
-===========================*/
+    let startTime = Date.now();
 
-const backTop=document.querySelector(".back-to-top");
-
-if(backTop){
-
-window.addEventListener("scroll",()=>{
-
-if(window.scrollY>500){
-
-backTop.style.opacity="1";
-backTop.style.pointerEvents="auto";
-
-}else{
-
-backTop.style.opacity="0";
-backTop.style.pointerEvents="none";
-
-}
-
-});
-
-}
-
-
-/*==========================
-      REVEAL ANIMATION
-===========================*/
-
-const reveals=document.querySelectorAll(
-
-".hero,.problem,.why-us,.cta,.testimonial,.statistics,.about,.video-section,.promo,.footer"
-
-);
-
-const reveal=()=>{
-
-reveals.forEach(el=>{
-
-const top=el.getBoundingClientRect().top;
-
-const windowHeight=window.innerHeight;
-
-if(top<windowHeight-120){
-
-el.style.opacity="1";
-
-el.style.transform="translateY(0)";
-
-}
-
-});
-
-}
-
-reveals.forEach(el=>{
-
-el.style.opacity="0";
-el.style.transform="translateY(60px)";
-el.style.transition="all .8s ease";
-
-});
-
-window.addEventListener("scroll",reveal);
-
-reveal();
-
-
-/*==========================
-      YEAR AUTO
-===========================*/
-
-const year=document.querySelector("#year");
-
-if(year){
-
-year.innerHTML=new Date().getFullYear();
-
-}
-
-document.querySelectorAll(".btn-primary").forEach(button=>{
-
-button.addEventListener("click",(e)=>{
-
-e.preventDefault();
-
-if(typeof gtag==="function"){
-
-gtag("event","topup_click",{
-
-button_name:button.innerText.trim()
-
-});
-
-}
-
-});
-
-});
-
-
-const login=document.querySelector(".btn-login");
-
-if(login){
-
-    login.addEventListener("click",(e)=>{
-
-        e.preventDefault();
-
-        if(typeof gtag==="function"){
-
-            gtag("event","login_click");
+    const sendTimeOnPage = () => {
+
+        if (!startTime) {
+            return;
+        }
+
+        const seconds =
+            Math.round(
+                (Date.now() - startTime) / 1000
+            );
+
+        if (
+            seconds > 0 &&
+            typeof gtag === "function"
+        ) {
+
+            gtag(
+                "event",
+                "time_on_page",
+                {
+                    seconds: seconds
+                }
+            );
 
         }
 
-    });
+        startTime = null;
 
-}
-
-
-document.querySelectorAll(".nav-menu a").forEach(menu=>{
-
-menu.addEventListener("click",()=>{
-
-if(typeof gtag==="function"){
-
-gtag("event","menu_click",{
-
-menu:menu.innerText.trim()
-
-});
-
-}
-
-});
-
-});
-
-let scrollSent=false;
-
-window.addEventListener("scroll",()=>{
-
-if(!scrollSent){
-
-const scrollPercent=(window.scrollY+window.innerHeight)/document.body.scrollHeight;
-
-if(scrollPercent>0.9){
-
-scrollSent=true;
-
-if(typeof gtag==="function"){
-
-gtag("event","scroll_90");
-
-}
-
-}
-
-}
-
-});
+    };
 
 
-const videoButton=document.querySelector(".play-button a");
+    document.addEventListener(
+        "visibilitychange",
+        () => {
 
-if(videoButton){
+            if (
+                document.visibilityState ===
+                "hidden"
+            ) {
 
-    videoButton.addEventListener("click",()=>{
+                sendTimeOnPage();
 
-        if(typeof gtag==="function"){
-
-            gtag("event","video_click");
+            }
 
         }
-
-    });
-
-}
+    );
 
 
-if(backTop){
+    /*==========================
+          JAVASCRIPT ERROR GA4
+    ==========================*/
 
-    backTop.addEventListener("click",()=>{
+    window.addEventListener(
+        "error",
+        event => {
 
-        if(typeof gtag==="function"){
+            if (
+                typeof gtag === "function"
+            ) {
 
-            gtag("event","back_to_top");
+                gtag(
+                    "event",
+                    "javascript_error",
+                    {
+                        message:
+                            event.message ||
+                            "Unknown error"
+                    }
+                );
+
+            }
 
         }
-
-    });
-
-}
+    );
 
 
-/*=================================
-        TIME ON PAGE
-==================================*/
+    /*==========================
+          INITIALIZE
+    ==========================*/
 
-let startTime=Date.now();
-
-window.addEventListener("beforeunload",()=>{
-
-const seconds=Math.round((Date.now()-startTime)/1000);
-
-if(typeof gtag==="function"){
-
-gtag("event","time_on_page",{
-
-seconds:seconds
-
-});
-
-}
-
-});
-
-
-/*=================================
-      SOCIAL CLICK
-==================================*/
-
-document.querySelectorAll(".social-media a").forEach(link=>{
-
-link.addEventListener("click",()=>{
-
-const icon=link.querySelector("i");
-
-if(typeof gtag==="function"){
-
-gtag("event","social_click",{
-
-social:icon.className
-
-});
-
-}
-
-});
-
-});
-
-
-window.addEventListener("error",(e)=>{
-
-if(typeof gtag==="function"){
-
-gtag("event","javascript_error",{
-
-message:e.message
-
-});
-
-}
+    handleScroll();
 
 });
